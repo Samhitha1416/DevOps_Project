@@ -1,53 +1,31 @@
 pipeline {
-    agent none
-    options { 
-        timestamps()
-        timeout(time: 15, unit: 'MINUTES') 
-    }
-
+    agent any
     stages {
-        /* 1) WHERE AM I — run on Controller (built-in) */
-        stage('Where am I (Controller)') {
-            agent { label 'built-in' }
+        stage('Checkout') {
             steps {
-                echo "NODE = ${env.NODE_NAME}"
-                echo "WORKSPACE = ${env.WORKSPACE}"
+                // Always use Jenkins-managed WORKSPACE, not hardcoded path
+                checkout scm
             }
         }
 
-        /* 2) BUILD / PACKAGE HTML — on any Agent */
         stage('Prepare HTML Project') {
-            agent { label 'win' }  // or your preferred agent
+            agent { label 'win-agent-2' }
+            steps {
+                dir("${WORKSPACE}") {
+                    // Clean workspace before fresh checkout
+                    deleteDir()
+                    checkout scm
+                }
+            }
+        }
+
+        stage('Build') {
             steps {
                 bat """
-                if exist dist rmdir /s /q dist
-                mkdir dist
-                xcopy /E /I src\\* dist\\
-                echo HTML_Build_OK > artifact.txt
+                if exist out rmdir /s /q out
+                mkdir out
+                echo Building HTML project...
                 """
-            }
-            post {
-                always {
-                    archiveArtifacts artifacts: 'artifact.txt, dist/**', allowEmptyArchive: false
-                }
-            }
-        }
-
-        /* 3) PARALLEL DEMO — Controller vs Agent */
-        stage('Parallel: Controller vs Agent') {
-            parallel {
-                stage('Controller lane') {
-                    agent { label 'built-in' }
-                    steps {
-                        echo "PARALLEL NODE = ${env.NODE_NAME}"
-                    }
-                }
-                stage('Agent lane') {
-                    agent { label 'win' }
-                    steps {
-                        bat "echo PARALLEL NODE = %NODE_NAME%"
-                    }
-                }
             }
         }
     }
