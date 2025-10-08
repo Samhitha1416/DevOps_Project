@@ -3,7 +3,6 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Always use Jenkins-managed WORKSPACE, not hardcoded path
                 checkout scm
             }
         }
@@ -11,8 +10,8 @@ pipeline {
         stage('Prepare HTML Project') {
             agent { label 'win-agent-2' }
             steps {
-                dir("${WORKSPACE}") {
-                    // Clean workspace before fresh checkout
+                // force workspace directory
+                dir('C:\\jenkins\\agent2\\workspace\\DevOps_Project') {
                     deleteDir()
                     checkout scm
                 }
@@ -22,9 +21,7 @@ pipeline {
         stage('Build') {
             steps {
                 bat """
-                if exist out rmdir /s /q out
-                mkdir out
-                echo Building HTML project...
+                echo Building project...
                 """
             }
         }
