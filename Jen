@@ -6,7 +6,6 @@ pipeline {
                 checkout scm
             }
         }
-
         stage('Prepare HTML Project') {
             agent { label 'win-agent-2' }
             steps {

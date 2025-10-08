@@ -1,0 +1,36 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Checkout your Git repo
+                git branch: 'main', url: 'https://github.com/Samhitha1416/DevOps_Project.git'
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                // Install npm packages
+                bat 'npm install'
+            }
+        }
+
+        stage('Run Project') {
+            steps {
+                // Start lite-server
+                echo 'Starting lite-server...'
+                bat 'start cmd /c "npm start"'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed.'
+        }
+    }
+}
