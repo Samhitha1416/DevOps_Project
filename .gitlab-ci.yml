@@ -1,0 +1,34 @@
+stages:
+  - build
+  - run
+  - deploy
+
+build:
+  stage: build
+  script:
+    - echo "Building static site..."
+    - rm -rf out
+    - mkdir out
+    - cp -r * out/
+  artifacts:
+    paths:
+      - out/
+
+run:
+  stage: run
+  script:
+    - echo "Checking static site files..."
+    - ls -l out
+  dependencies:
+    - build
+
+pages:
+  stage: deploy
+  script:
+    - echo "Deploying static site to GitLab Pages..."
+    - mv out public
+  artifacts:
+    paths:
+      - public
+  only:
+    - main 
